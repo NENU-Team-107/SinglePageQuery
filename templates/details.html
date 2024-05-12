@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<link rel="stylesheet" href="{{ url_for('static', filename='details.css') }}">
+{% endblock %}
+
+{% block content %}
+<h2>{{ filename }} 数据概览</h2>
+
+<form id="filter-form" method="post" action="{{ url_for('Query') }}">
+    <div id="filter-container">
+        <div class="filter-row">
+            <select name="conditions[0][column]">
+                {% for column in data.columns %}
+                <option value="{{ column }}">{{ column }}</option>
+                {% endfor %}
+            </select>
+            <select name="conditions[0][operator]">
+                <option value="是">是</option>
+                <option value="不是">不是</option>
+                <option value="像">像</option>
+                <option value="大于">大于</option>
+                <option value="小于">小于</option>
+                <option value="大于等于">大于等于</option>
+                <option value="小于等于">小于等于</option>
+            </select>
+            <input type="text" name="conditions[0][value]" placeholder="输入值">
+            <button type="button" onclick="addFilterRow()">增加条件</button>
+        </div>
+    </div>
+    <button type="submit">查找</button>
+</form>
+
+
+<table>
+    <thead>
+        <tr>
+            {% for column in data.columns %}
+            <th>{{ column }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for index, row in data.iterrows() %}
+        <tr>
+            {% for value in row %}
+            <td>{{ value }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    let filterIndex = 1;
+
+    function addFilterRow() {
+        const container = document.getElementById('filter-container');
+        const row = document.createElement('div');
+        row.classList.add('filter-row');
+
+        const columnSelect = document.createElement('select');
+        columnSelect.name = `conditions[${filterIndex}][column]`;
+
+        {% for column in data.columns %}
+        var option = document.createElement('option');
+        option.value = '{{ column }}';
+        option.text = '{{ column }}';
+        columnSelect.add(option);
+        {% endfor %}
+
+        const operatorSelect = document.createElement('select');
+        operatorSelect.name = `conditions[${filterIndex}][operator]`;
+        const operators = ['是', '不是', '像', '大于', '小于', '大于等于', '小于等于'];
+        for (const operator of operators) {
+            const option = document.createElement('option');
+            option.value = operator;
+            option.text = operator;
+            operatorSelect.add(option);
+        }
+
+        const valueInput = document.createElement('input');
+        valueInput.type = 'text';
+        valueInput.name = `conditions[${filterIndex}][value]`;
+        valueInput.placeholder = '输入值';
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.textContent = '移除条件';
+        removeButton.onclick = function () {
+            container.removeChild(row);
+        };
+
+        const conditionSelect = document.createElement('select');
+        conditionSelect.name = `conditions[${filterIndex}][condition]`;
+        const conditions = ['并且', '或者'];
+        for (const condition of conditions) {
+            const option = document.createElement('option');
+            option.value = condition;
+            option.text = condition;
+            conditionSelect.add(option);
+        }
+
+        row.appendChild(conditionSelect);
+        row.appendChild(columnSelect);
+        row.appendChild(operatorSelect);
+        row.appendChild(valueInput);
+        row.appendChild(removeButton);
+        row.appendChild(document.createTextNode(' '));
+        container.appendChild(row);
+
+        filterIndex++;
+    }
+</script>
+{% endblock %}

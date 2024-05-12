@@ -1,0 +1,23 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+}
+
+select {
+    font-size: 20px;
+    padding: 10px;
+}
+
+button {
+    font-size: 20px;
+    padding: 10px 20px;
+    margin-left: 10px;
+}

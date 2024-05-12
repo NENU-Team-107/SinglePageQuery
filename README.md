@@ -1,5 +1,7 @@
 # Single Page Query Application
 
+[中文文档](./README-zh.md)
+
 ## Build
 
 1. download the python 3.11 or higher version

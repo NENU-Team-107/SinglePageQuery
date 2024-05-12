@@ -1,8 +1,12 @@
-from flask import Flask
-
+from flask import Flask, render_template, request
+import dbfread
+import pandas as pd
 import os
 
 app = Flask(__name__)
+
+filename_list = []
+data = pd.DataFrame()
 
 
 @app.route("/", methods=["GET"])
@@ -12,10 +16,16 @@ def Home():
         1. A select input (i.e. a list of tables in data)
         2. Two buttons, one is `Submit` to display a overview of table, the other is `Reset` to clear the select input
     """
-    pass
+    global filename_list
+    if filename_list == []:
+        full_filename_list = os.listdir("data")
+        filename_list = [
+            f for f in full_filename_list if f.endswith(".dbf") or f.endswith(".xlsx")
+        ]
+    return render_template("home.html", filename_list=filename_list)
 
 
-@app.route("/details", method=["GET"])
+@app.route("/details", methods=["POST"])
 def Tables():
     """
     This function will do things as followed:
@@ -26,10 +36,22 @@ def Tables():
 
         [this is a placeholder for items] [and/or] [button to increase or decrease the number of conditional statements]
     """
-    pass
+    global data
+    filename = request.form["filename"]
+    if filename_list.count(filename) == 0:
+        return NotFound()
+    if filename.endswith(".dbf"):
+        file = dbfread.DBF("data/" + filename)
+        data = pd.DataFrame(iter(file))
+    elif filename.endswith(".xlsx"):
+        data = pd.read_excel("data/" + filename, sheet_name=0)
+    else:
+        return NotFound()
+
+    return render_template("details.html", filename=filename, data=data.head(30))
 
 
-@app.route("/query", method=["POST"])
+@app.route("/query", methods=["POST"])
 def Query():
     """
     This function will do things as followed:
@@ -37,4 +59,47 @@ def Query():
         2. Execute the query
         3. Render the page with queryed data(and its query condition)
     """
-    pass
+    global data
+    conditions = dict(request.form)
+    conditions_list = []
+    for i in range(0, (len(conditions) - 3) // 4):
+        column = conditions[f"conditions[{i}][column]"]
+        operator = conditions[f"conditions[{i}][operator]"]
+        value = conditions[f"conditions[{i}][value]"]
+
+        if operator == "是":
+            conditions_expr = data[column] == value
+        elif operator == "不是":
+            conditions_expr = data[column] != value
+        elif operator == "像":
+            conditions_expr = data[column].str.contains(value)
+        elif operator == ">":
+            conditions_expr = data[column] > value
+        elif operator == "<":
+            conditions_expr = data[column] < value
+        elif operator == ">=":
+            conditions_expr = data[column] >= value
+        elif operator == "<=":
+            conditions_expr = data[column] <= value
+        else:
+            return NotFound()
+        conditions_list.append(conditions_expr)
+    combined_conditions = conditions_list[0]
+    for i in range(1, len(conditions_list)):
+        condition = conditions[f"conditions[{i}][condition]"]
+        if condition == "并且":
+            combined_conditions = combined_conditions & conditions_list[i]
+        else:
+            combined_conditions = combined_conditions | conditions_list[i]
+
+    filtered_data = data[combined_conditions]
+    return render_template("query.html", data=filtered_data)
+
+
+@app.errorhandler(404)
+def NotFound():
+    return render_template("404.html"), 404
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
