@@ -20,7 +20,7 @@ def Home():
     if filename_list == []:
         full_filename_list = os.listdir("data")
         filename_list = [
-            f for f in full_filename_list if f.endswith(".dbf") or f.endswith(".xlsx")
+            f for f in full_filename_list if f.endswith(".dbf") or f.endswith(".xlsx") or f.endswith(".xls")
         ]
     return render_template("home.html", filename_list=filename_list)
 
@@ -43,7 +43,7 @@ def Tables():
     if filename.endswith(".dbf"):
         file = dbfread.DBF("data/" + filename)
         data = pd.DataFrame(iter(file))
-    elif filename.endswith(".xlsx"):
+    elif filename.endswith(".xlsx") or filename.endswith(".xls"):
         data = pd.read_excel("data/" + filename, sheet_name=0)
     else:
         return NotFound()
