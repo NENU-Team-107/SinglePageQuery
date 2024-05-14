@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 import dbfread
 import pandas as pd
 import os
@@ -95,6 +95,10 @@ def Query():
     filtered_data = data[combined_conditions]
     return render_template("query.html", data=filtered_data)
 
+
+@app.route("/favicon.ico")
+def Favicon():
+    return send_from_directory(os.path.join(app.root_path, "static"), "favicon.ico")
 
 @app.errorhandler(404)
 def NotFound():
