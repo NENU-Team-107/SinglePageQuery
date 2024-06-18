@@ -28,7 +28,7 @@
 2. open the powershell to run command followed(only run in your first startup):
     ```bash
     python -m venv .venv
-    . .venv/bin/Activate.ps1
+    .venv/Scripts/Activate.ps1
     pip install -r requirements.txt
     ```
 

@@ -62,7 +62,7 @@ def Query():
     global data
     conditions = dict(request.form)
     conditions_list = []
-    for i in range(0, (len(conditions) - 3) // 4):
+    for i in range(0, round(len(conditions) / 4)):
         column = conditions[f"conditions[{i}][column]"]
         operator = conditions[f"conditions[{i}][operator]"]
         value = conditions[f"conditions[{i}][value]"]

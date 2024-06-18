@@ -6,7 +6,7 @@
 
 1. 在文件夹中打开 `powershell`(ps)，做法为打开此文件夹，将路径清空后输入 powershell，然后回车，即可打开
 
-2. 输入命令：`.venv/bin/Activate.ps1`，回车
+2. 输入命令：`.venv/Scripts/Activate.ps1`，回车
 
 3. 随后，输入命令 `pip install -r requirements.txt` 安装环境（注意，只有第一次运行时需要运行这一步，后续可以直接跳过这一步）
 
